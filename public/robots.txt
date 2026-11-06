@@ -1,0 +1,8 @@
+User-agent: *
+Allow: /
+Disallow: /checkout
+Disallow: /profile
+Disallow: /wallets
+Disallow: /orders/
+
+Sitemap: https://jungle-gaming-challenge.netlify.app/sitemap.xml
