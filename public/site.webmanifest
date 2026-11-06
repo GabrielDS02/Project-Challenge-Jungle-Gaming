@@ -1,0 +1,10 @@
+{
+  "name": "Jungle NFT Marketplace",
+  "short_name": "Jungle",
+  "description": "Marketplace demonstrativo de arte digital.",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#160d08",
+  "theme_color": "#160d08",
+  "icons": [{ "src": "/favicon.svg", "sizes": "any", "type": "image/svg+xml", "purpose": "any maskable" }]
+}
