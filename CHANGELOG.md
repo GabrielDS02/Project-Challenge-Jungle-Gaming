@@ -3,6 +3,22 @@
 Todas as mudanças relevantes seguem [Keep a Changelog](https://keepachangelog.com/pt-BR/1.1.0/)
 e [Versionamento Semântico](https://semver.org/lang/pt-BR/).
 
+## [Não lançado]
+
+### Adicionado
+
+- PWA instalável com ícones próprios, atalhos, prompt contextual e suporte iOS.
+- Cache offline integrado ao worker do MSW, validado em desktop e mobile.
+- Galeria de NFT interativa com miniaturas, transições e visualização ampliada.
+
+### Corrigido
+
+- Sobreposição entre arte e informações na página de detalhes em telas largas.
+- Miniaturas que não alteravam a imagem principal do NFT.
+- Menus nativos com fundo branco e opções ilegíveis no tema escuro.
+- Estoque de edições únicas que podia ultrapassar o suprimento total.
+- Reflow e overflow horizontal da página de detalhes em dispositivos móveis.
+
 ## [1.0.0] - 2026-11-06
 
 ### Adicionado
@@ -21,3 +37,4 @@ e [Versionamento Semântico](https://semver.org/lang/pt-BR/).
 - Documentação, licença MIT, autoria, contribuição e política de segurança.
 
 [1.0.0]: https://github.com/GabrielDS02/Project-Challenge-Jungle-Gaming/releases/tag/v1.0.0
+[Não lançado]: https://github.com/GabrielDS02/Project-Challenge-Jungle-Gaming/compare/v1.0.0...HEAD

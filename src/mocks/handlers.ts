@@ -422,7 +422,9 @@ export const handlers = [
     if (!nft) return jsonError(404, "NFT_NOT_FOUND", "NFT não encontrado.");
     nft.previousPriceEth = nft.priceEth;
     if (priceEth) nft.priceEth = priceEth;
-    if (available !== undefined) nft.available = available;
+    if (available !== undefined) {
+      nft.available = Math.max(0, Math.min(available, nft.totalSupply));
+    }
     nft.version += 1;
     saveDb();
     const event: NftUpdatedEvent = {

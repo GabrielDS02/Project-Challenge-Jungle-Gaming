@@ -5,6 +5,7 @@ import { useCart } from "@/features/cart/queries";
 import { useLogout, useSession } from "@/features/auth/queries";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import { PwaInstall } from "@/components/pwa-install";
 
 const links = [
   ["Início", "/"],
@@ -43,6 +44,7 @@ export function Header() {
           ))}
         </nav>
         <div className="flex items-center gap-1 sm:gap-2">
+          <PwaInstall className="hidden xl:inline-flex" />
           <a
             href="/#catalogo"
             aria-label="Buscar NFTs"
@@ -126,6 +128,7 @@ export function Header() {
                   </>
                 )}
               </nav>
+              <PwaInstall mobile className="mt-6" />
               {session.data ? (
                 <Button variant="secondary" className="mt-8 w-full" onClick={() => logout.mutate()}>
                   Sair

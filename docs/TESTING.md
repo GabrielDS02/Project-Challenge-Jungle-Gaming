@@ -12,6 +12,17 @@ pnpm lighthouse
 O Playwright inicia `pnpm preview`, usa Chromium em 1440×1000 e 390×844,
 mantém trace/video/screenshot em falhas e gera relatório HTML.
 
+Os testes de interface também verificam que a galeria troca de imagem, o zoom é
+acessível, as colunas não se sobrepõem e os menus Radix preservam contraste em
+desktop/mobile.
+
+## PWA
+
+`tests/e2e/pwa.spec.ts` valida o manifest, os ícones 192/512, a versão maskable,
+o escopo do service worker e a criação do cache. Em seguida desliga a rede do
+contexto do navegador, recarrega a aplicação e confirma que o shell React volta
+a funcionar inteiramente pelo cache.
+
 ## Laboratório de mocks
 
 O botão de frasco no canto inferior esquerdo ativa sucesso, rede lenta, offline,

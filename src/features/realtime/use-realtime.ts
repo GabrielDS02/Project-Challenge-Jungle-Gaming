@@ -19,7 +19,7 @@ export function useRealtime() {
       versions.current.set(key, version);
       return true;
     };
-    socket.on("nft.updated", (event: NftUpdatedEvent) => {
+    const onNftUpdated = (event: NftUpdatedEvent) => {
       if (!accepts(`nft:${event.resourceId}`, event.version)) return;
       client.setQueryData<Nft>(["nft", event.resourceId], (current) =>
         current ? { ...current, ...event.patch, version: event.version } : current,
@@ -27,8 +27,8 @@ export function useRealtime() {
       void client.invalidateQueries({ queryKey: ["nfts"] });
       void client.invalidateQueries({ queryKey: ["cart"] });
       void client.invalidateQueries({ queryKey: ["quote"] });
-    });
-    socket.on("order.updated", (event: OrderUpdatedEvent) => {
+    };
+    const onOrderUpdated = (event: OrderUpdatedEvent) => {
       if (!accepts(`order:${event.resourceId}`, event.version)) return;
       client.setQueryData<Order>(["order", event.resourceId], (current) =>
         current
@@ -37,12 +37,27 @@ export function useRealtime() {
       );
       void client.invalidateQueries({ queryKey: ["order", event.resourceId] });
       void client.invalidateQueries({ queryKey: ["cart"] });
-    });
+    };
+    const onNftFallback = (event: Event) => onNftUpdated((event as CustomEvent<NftUpdatedEvent>).detail);
+    const onOrderFallback = (event: Event) =>
+      onOrderUpdated((event as CustomEvent<OrderUpdatedEvent>).detail);
+
+    socket.on("nft.updated", onNftUpdated);
+    socket.on("order.updated", onOrderUpdated);
+    window.addEventListener("jungle:nft.updated", onNftFallback);
+    window.addEventListener("jungle:order.updated", onOrderFallback);
     socket.on("connect", () => {
+      document.documentElement.dataset.realtime = "connected";
       void client.invalidateQueries({ queryKey: ["cart"] });
       void client.invalidateQueries({ queryKey: ["order"] });
     });
+    socket.on("disconnect", () => {
+      document.documentElement.dataset.realtime = "disconnected";
+    });
     return () => {
+      delete document.documentElement.dataset.realtime;
+      window.removeEventListener("jungle:nft.updated", onNftFallback);
+      window.removeEventListener("jungle:order.updated", onOrderFallback);
       socket.disconnect();
     };
   }, [client]);

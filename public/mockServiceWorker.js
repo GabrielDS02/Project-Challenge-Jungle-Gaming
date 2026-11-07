@@ -4,23 +4,66 @@
 /**
  * Mock Service Worker.
  * @see https://github.com/mswjs/msw
- * - Please do NOT modify this file.
+ * Extended with a small application-shell cache so the same worker can power
+ * both the MSW demo API and the installable Jungle PWA.
  */
 
 const PACKAGE_VERSION = '2.15.0'
 const INTEGRITY_CHECKSUM = '03cb67ac84128e63d7cd722a6e5b7f1e'
 const IS_MOCKED_RESPONSE = Symbol('isMockedResponse')
 const activeClientIds = new Set()
+const PWA_CACHE_PREFIX = 'jungle-pwa-'
+const PWA_CACHE = `${PWA_CACHE_PREFIX}v1`
+const PWA_ENABLED = new URL(self.location.href).searchParams.get('pwa') === '1'
+const PWA_SHELL = [
+  '/',
+  '/site.webmanifest',
+  '/favicon.svg',
+  '/icons/jungle-app-icon.svg',
+  '/icons/jungle-app-icon-maskable.svg',
+  '/icons/jungle-app-icon-192.png',
+  '/icons/jungle-app-icon-512.png',
+]
 
-addEventListener('install', function () {
+addEventListener('install', function (event) {
   self.skipWaiting()
+  if (!PWA_ENABLED) return
+  event.waitUntil(
+    caches
+      .open(PWA_CACHE)
+      .then((cache) => cache.addAll(PWA_SHELL))
+      .catch(() => undefined),
+  )
 })
 
 addEventListener('activate', function (event) {
-  event.waitUntil(self.clients.claim())
+  event.waitUntil(
+    Promise.all([
+      self.clients.claim(),
+      PWA_ENABLED
+        ? caches
+            .keys()
+            .then((keys) =>
+              Promise.all(
+                keys
+                  .filter((key) => key.startsWith(PWA_CACHE_PREFIX) && key !== PWA_CACHE)
+                  .map((key) => caches.delete(key)),
+              ),
+            )
+        : Promise.resolve(),
+    ]),
+  )
 })
 
 addEventListener('message', async function (event) {
+  if (PWA_ENABLED && event.data?.type === 'PWA_CACHE_URLS') {
+    const caching = cachePwaUrls(event.data.urls).then(() => {
+      event.ports[0]?.postMessage({ cached: true })
+    })
+    event.waitUntil(caching)
+    return
+  }
+
   const clientId = Reflect.get(event.source || {}, 'id')
 
   if (!clientId || !self.clients) {
@@ -78,11 +121,6 @@ addEventListener('message', async function (event) {
         return client.id !== clientId
       })
 
-      // Unregister itself when there are no more clients
-      if (remainingClients.length === 0) {
-        self.registration.unregister()
-      }
-
       break
     }
   }
@@ -91,8 +129,14 @@ addEventListener('message', async function (event) {
 addEventListener('fetch', function (event) {
   const requestInterceptedAt = Date.now()
 
-  // Bypass navigation requests.
-  if (event.request.mode === 'navigate') {
+  // Keep SPA navigations available offline without interfering with MSW API requests.
+  if (PWA_ENABLED && event.request.mode === 'navigate') {
+    event.respondWith(networkFirstNavigation(event.request))
+    return
+  }
+
+  if (PWA_ENABLED && isPwaAsset(event.request)) {
+    event.respondWith(cacheFirstAsset(event.request))
     return
   }
 
@@ -115,6 +159,59 @@ addEventListener('fetch', function (event) {
   const requestId = crypto.randomUUID()
   event.respondWith(handleRequest(event, requestId, requestInterceptedAt))
 })
+
+function isPwaAsset(request) {
+  if (request.method !== 'GET') return false
+  const url = new URL(request.url)
+  if (url.origin !== self.location.origin) return false
+  return (
+    ['script', 'style', 'image', 'font', 'manifest'].includes(request.destination) ||
+    url.pathname.startsWith('/assets/') ||
+    url.pathname.startsWith('/icons/') ||
+    url.pathname === '/favicon.svg' ||
+    url.pathname === '/site.webmanifest'
+  )
+}
+
+async function networkFirstNavigation(request) {
+  const cache = await caches.open(PWA_CACHE)
+  try {
+    const response = await fetch(request)
+    if (response.ok) await cache.put(request, response.clone())
+    return response
+  } catch {
+    return (await cache.match(request)) || (await cache.match('/')) || Response.error()
+  }
+}
+
+async function cacheFirstAsset(request) {
+  const cache = await caches.open(PWA_CACHE)
+  // Vite sends `Vary: Origin`; cached resources are same-origin and safe to reuse
+  // even when a module request adds an Origin header on a later offline launch.
+  const cached = await cache.match(request, { ignoreVary: true })
+  if (cached) return cached
+
+  try {
+    const response = await fetch(request)
+    if (response.ok) await cache.put(request, response.clone())
+    return response
+  } catch {
+    return Response.error()
+  }
+}
+
+async function cachePwaUrls(urls = []) {
+  const cache = await caches.open(PWA_CACHE)
+  const uniqueUrls = [...new Set(urls)]
+  await Promise.allSettled(
+    uniqueUrls.map(async (url) => {
+      const parsed = new URL(url, self.location.origin)
+      if (parsed.origin !== self.location.origin || parsed.pathname.startsWith('/api/')) return
+      const response = await fetch(parsed.href)
+      if (response.ok) await cache.put(parsed.href, response)
+    }),
+  )
+}
 
 /**
  * @param {FetchEvent} event

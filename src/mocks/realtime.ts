@@ -15,4 +15,7 @@ export const socketHandler = socketLink.addEventListener("connection", (connecti
 
 export function broadcastSocketEvent(event: string, payload: unknown) {
   clients.forEach((client) => client.emit(event, payload));
+  // The browser event keeps the local demo responsive when a corporate proxy blocks WebSockets.
+  // Version checks in the consumer deduplicate it when Socket.IO also delivers the event.
+  window.dispatchEvent(new CustomEvent(`jungle:${event}`, { detail: payload }));
 }

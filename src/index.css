@@ -85,17 +85,49 @@ img {
   letter-spacing: -0.04em;
   color: #f4dfbf;
 }
-.select-field {
-  height: 3rem;
-  border: 1px solid rgba(255, 255, 255, 0.12);
-  background: rgba(0, 0, 0, 0.2);
-  color: #f4dfbf;
-  padding-inline: 0.9rem 2rem;
-  outline: none;
+@keyframes select-in {
+  from {
+    opacity: 0;
+    transform: translateY(-0.4rem) scale(0.98);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
 }
-.select-field:focus {
-  border-color: #e89045;
-  box-shadow: 0 0 0 2px rgba(232, 144, 69, 0.2);
+.select-menu-content[data-state="open"] {
+  animation: select-in 0.18s cubic-bezier(0.22, 1, 0.36, 1);
+}
+@keyframes detail-in {
+  from {
+    opacity: 0;
+    transform: translateY(1.25rem);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+@keyframes artwork-reveal {
+  from {
+    opacity: 0;
+    transform: scale(1.025);
+    filter: saturate(0.75);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+    filter: saturate(1);
+  }
+}
+.gallery-intro {
+  animation: detail-in 0.55s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+.detail-intro {
+  animation: detail-in 0.55s 0.08s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+.artwork-reveal {
+  animation: artwork-reveal 0.42s ease-out both;
 }
 @keyframes menu-in {
   from {

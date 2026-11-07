@@ -54,7 +54,7 @@ export function NftCard({ nft, favorite = false }: { nft: Nft; favorite?: boolea
         </Link>
         <div className="mt-4 flex items-end justify-between gap-3 border-t border-white/8 pt-4">
           <div>
-            <p className="text-[10px] uppercase tracking-widest text-sand/40">Preço</p>
+            <p className="text-[10px] font-bold uppercase tracking-widest text-sand/65">Preço</p>
             <p className="mt-1 text-sm font-bold text-sand">{formatEth(nft.priceEth)}</p>
           </div>
           <Button
