@@ -51,6 +51,10 @@ O app usa `socket.io-client`. O MSW intercepta o WebSocket e o binding traduz os
 frames Engine.IO/Socket.IO. Eventos têm `resourceId`, `version` e `occurredAt`.
 O cliente ignora versões antigas/duplicadas; ao reconectar invalida dados ativos
 para reconciliar com REST. O mock suporta namespace padrão e eventos de texto.
+Como fallback exclusivo da demonstração local, o emissor também publica um
+`CustomEvent`; o mesmo controle de versão elimina duplicatas quando Socket.IO e
+o fallback chegam juntos e mantém a interface responsiva em proxies que bloqueiam
+WebSocket.
 
 ## Figma e acessibilidade
 
@@ -58,6 +62,22 @@ A composição, tons espresso, acento âmbar, tipografia editorial e proporçõe
 seguem os frames públicos do Figma. As artes foram substituídas por imagens
 originais geradas para evitar dependências e direitos de coleções existentes.
 Contraste/foco e reflow receberam pequenos ajustes em relação ao frame.
+
+## PWA e cache offline
+
+Uma origem aceita apenas um service worker controlador por escopo. Como a
+demonstração também depende do worker do MSW, `mockServiceWorker.js` concentra as
+duas responsabilidades sem registrar workers concorrentes:
+
+- requisições `/api` continuam passando pelo protocolo do MSW;
+- navegações usam estratégia network-first com fallback para o shell;
+- scripts, estilos, imagens, fontes e manifest usam cache-first em produção;
+- `Vary: Origin` dos módulos Vite é ignorado somente para assets same-origin;
+- caches antigos com prefixo `jungle-pwa-` são removidos na ativação.
+
+O navegador envia ao worker a lista real de bundles com hash após o primeiro
+carregamento. Um `MessageChannel` confirma a conclusão antes de marcar o shell
+como pronto para uso offline.
 
 ## Segurança
 

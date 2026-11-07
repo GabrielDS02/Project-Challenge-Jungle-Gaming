@@ -4,6 +4,7 @@ import { api } from "@/lib/api";
 import type { MockScenario } from "@/types/api";
 import { Button } from "./ui/button";
 import { Dialog, DialogContent, DialogDescription, DialogTitle, DialogTrigger } from "./ui/dialog";
+import { SelectField } from "./ui/select";
 
 const scenarios: Array<[MockScenario, string]> = [
   ["success", "Sucesso padrão"],
@@ -59,17 +60,12 @@ export function MockLab() {
         </DialogDescription>
         <label className="mt-6 grid gap-2 text-xs font-bold uppercase tracking-widest text-sand/55">
           Cenário
-          <select
-            className="select-field w-full"
+          <SelectField
+            ariaLabel="Cenário"
             value={scenario.data ?? "success"}
-            onChange={(event) => select.mutate(event.target.value as MockScenario)}
-          >
-            {scenarios.map(([value, label]) => (
-              <option key={value} value={value}>
-                {label}
-              </option>
-            ))}
-          </select>
+            options={scenarios.map(([value, label]) => ({ value, label }))}
+            onValueChange={(value) => select.mutate(value)}
+          />
         </label>
         <div className="mt-6 grid gap-3 sm:grid-cols-2">
           <Button variant="secondary" onClick={() => realtime.mutate()}>

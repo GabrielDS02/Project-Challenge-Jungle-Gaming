@@ -29,7 +29,7 @@ TanStack Query, navegação pelo TanStack Router e tempo real pelo
 ## O que está incluído
 
 - Catálogo com busca, filtros combináveis, ordenação, paginação e histórico da URL.
-- Detalhe direto/404, edição, disponibilidade, quantidade e favorito otimista.
+- Detalhe direto/404, galeria interativa, zoom, disponibilidade, quantidade e favorito otimista.
 - Carrinho de visitante persistente, merge no login, cupom e precisão decimal.
 - Login, cadastro, expiração, logout, perfil, avatar, senha e carteiras.
 - Checkout com revalidação, chave idempotente e prevenção de clique duplicado.
@@ -37,6 +37,7 @@ TanStack Query, navegação pelo TanStack Router e tempo real pelo
 - `nft.updated` e `order.updated` versionados, deduplicados e reconciliados com REST.
 - Cenários de latência, offline, 4xx/5xx, conflito, cupom, preço, estoque e pagamento.
 - Layouts desktop/mobile, skeleton shimmer, foco, teclado, reflow e movimento reduzido.
+- PWA instalável e offline com ícones `any`/`maskable`, atalhos e prompt de instalação.
 - Open Graph/WhatsApp, Twitter Card, JSON-LD, sitemap, robots, favicon e manifest.
 - Netlify SPA com CSP, headers de segurança e cache de assets.
 - Playwright E2E/visual e Lighthouse CI.
@@ -147,6 +148,21 @@ contraste, teclado e `prefers-reduced-motion`. Skeletons preservam dimensões.
 As artes são originais e locais; isso evita dependência externa e respeita o
 direito autoral de coleções existentes. O fundo, paleta, hierarquia e composição
 seguem o Figma; ajustes de contraste e reflow estão registrados na arquitetura.
+
+## Aplicativo instalável (PWA)
+
+O build de produção registra um service worker persistente que compartilha a
+fronteira de rede do MSW com o cache do aplicativo. Isso mantém os mocks REST
+funcionando e, ao mesmo tempo, permite reabrir a interface sem conexão após a
+primeira visita.
+
+- Chrome/Edge: use o botão **Instalar app** quando ele aparecer no cabeçalho.
+- iPhone/iPad: abra o menu móvel e siga **Compartilhar → Adicionar à Tela de Início**.
+- Manifest: nome, tema, escopo, atalhos, ícones 192/512 e versão `maskable`.
+- Offline: HTML, bundles versionados, estilos, ícones e artes visitadas ficam em cache.
+
+O cache é habilitado somente no build de produção, evitando interferência com o
+HMR durante o desenvolvimento.
 
 ## Qualidade e segurança
 

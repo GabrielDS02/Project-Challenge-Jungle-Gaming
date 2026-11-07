@@ -7,6 +7,7 @@ import { Dialog, DialogContent, DialogDescription, DialogTitle, DialogTrigger } 
 import { EmptyState, ErrorState, PageLoader } from "@/components/ui/feedback";
 import { Field } from "@/components/ui/field";
 import { Input } from "@/components/ui/input";
+import { SelectField } from "@/components/ui/select";
 import { api } from "@/lib/api";
 import { getErrorMessage, shortAddress } from "@/lib/utils";
 import type { Network, Wallet } from "@/types/api";
@@ -95,16 +96,17 @@ export function WalletsPage() {
                   />
                 </Field>
                 <Field id="wallet-network" label="Rede">
-                  <select
+                  <SelectField
                     id="wallet-network"
-                    className="select-field w-full"
+                    ariaLabel="Rede"
                     value={network}
-                    onChange={(event) => setNetwork(event.target.value as Network)}
-                  >
-                    <option value="ethereum">Ethereum</option>
-                    <option value="polygon">Polygon</option>
-                    <option value="arbitrum">Arbitrum</option>
-                  </select>
+                    options={[
+                      { value: "ethereum", label: "Ethereum" },
+                      { value: "polygon", label: "Polygon" },
+                      { value: "arbitrum", label: "Arbitrum" },
+                    ]}
+                    onValueChange={setNetwork}
+                  />
                 </Field>
                 <label className="flex items-center gap-3 text-sm text-sand/60">
                   <input

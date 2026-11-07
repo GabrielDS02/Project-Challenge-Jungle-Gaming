@@ -8,6 +8,7 @@ import { Seo } from "@/components/seo";
 import { Button } from "@/components/ui/button";
 import { EmptyState, ErrorState, Skeleton } from "@/components/ui/feedback";
 import { Input } from "@/components/ui/input";
+import { SelectField } from "@/components/ui/select";
 import { useSession } from "@/features/auth/queries";
 import { nftsQueryOptions, useFavorites, type CatalogSearch } from "@/features/nfts/queries";
 
@@ -153,17 +154,12 @@ export function HomePage() {
                 className="grid gap-2 text-[10px] font-bold uppercase tracking-widest text-sand/45"
               >
                 <span>{key === "category" ? "Categoria" : key === "edition" ? "Edição" : "Ordenar"}</span>
-                <select
-                  className="select-field w-full"
+                <SelectField
+                  ariaLabel={key === "category" ? "Categoria" : key === "edition" ? "Edição" : "Ordenar"}
                   value={(search[key] as string) ?? filterOptions[key][0][0]}
-                  onChange={(event) => void updateSearch({ [key]: event.target.value } as CatalogSearch)}
-                >
-                  {filterOptions[key].map(([value, label]) => (
-                    <option key={value} value={value}>
-                      {label}
-                    </option>
-                  ))}
-                </select>
+                  options={filterOptions[key].map(([value, label]) => ({ value, label }))}
+                  onValueChange={(value) => void updateSearch({ [key]: value } as CatalogSearch)}
+                />
               </label>
             ))}
           </div>

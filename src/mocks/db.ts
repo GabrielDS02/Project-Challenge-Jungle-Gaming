@@ -26,7 +26,7 @@ export function hashPassword(value: string) {
 }
 
 const nftCopy = [
-  ["emerald-ape-442", "Emerald Ape #442", "Emerald Tribe", "Vinicius Art", "2.49", 5, "unique", "art"],
+  ["emerald-ape-442", "Emerald Ape #442", "Emerald Tribe", "Vinicius Art", "2.49", 1, "unique", "art"],
   [
     "onyx-guardian-218",
     "Onyx Guardian #218",
@@ -37,7 +37,7 @@ const nftCopy = [
     "limited",
     "collectible",
   ],
-  ["sunset-oracle-071", "Sunset Oracle #071", "Golden Habitat", "Nuno Labs", "3.12", 2, "unique", "art"],
+  ["sunset-oracle-071", "Sunset Oracle #071", "Golden Habitat", "Nuno Labs", "3.12", 1, "unique", "art"],
   ["neon-mandrill-908", "Neon Mandrill #908", "Meta Fauna", "Sato Studio", "0.94", 14, "open", "gaming"],
   ["ivory-nomad-133", "Ivory Nomad #133", "Jungle Keepers", "Maya Hash", "1.42", 6, "limited", "collectible"],
   ["savanna-rider-514", "Savanna Rider #514", "Golden Habitat", "Nuno Labs", "2.08", 4, "limited", "gaming"],
@@ -139,7 +139,15 @@ function initialState(): MockDbState {
 function load(): MockDbState {
   try {
     const value = localStorage.getItem(STORAGE_KEY);
-    return value ? (JSON.parse(value) as MockDbState) : initialState();
+    if (!value) return initialState();
+
+    const stored = JSON.parse(value) as MockDbState;
+    // Normalize older demo data so stock can never exceed the edition's total supply.
+    stored.nfts = stored.nfts.map((nft) => ({
+      ...nft,
+      available: Math.min(nft.available, nft.totalSupply),
+    }));
+    return stored;
   } catch {
     return initialState();
   }

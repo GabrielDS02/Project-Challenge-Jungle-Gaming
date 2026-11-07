@@ -30,7 +30,7 @@ export function Footer() {
       </div>
       <div className="container flex flex-col gap-4 border-t border-white/8 py-6 text-xs text-sand/35 sm:flex-row sm:items-center sm:justify-between">
         <p>© 2026 Jungle Marketplace. Projeto demonstrativo.</p>
-        <div className="flex gap-3" aria-label="Redes sociais">
+        <div className="flex gap-3" role="group" aria-label="Redes sociais">
           <Github size={16} />
           <Linkedin size={16} />
           <Instagram size={16} />
