@@ -15,5 +15,5 @@
   <circle cx="256" cy="256" r="162" fill="#160d08" fill-opacity="0.72" stroke="url(#ember)" stroke-width="8" />
   <path d="M134 342c42-8 72-33 88-76-40 7-70 33-88 76Z" fill="#7b8f63" />
   <path d="M378 170c-41 8-71 33-87 76 40-8 70-33 87-76Z" fill="#7b8f63" fill-opacity="0.8" />
-  <path d="M283 151h66v146c0 75-41 115-111 115-59 0-97-30-111-85l63-18c7 28 22 43 47 43 31 0 46-20 46-60V151Z" fill="url(#ember)" />
+  <path d="M150 135h70v105l90-105h85L282 254l120 150h-90l-92-117v117h-70Z" fill="url(#ember)" />
 </svg>

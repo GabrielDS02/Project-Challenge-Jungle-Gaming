@@ -66,7 +66,9 @@ function makeQuote(coupon?: string): Quote {
     coupon: discountRate.isZero() ? undefined : coupon?.toUpperCase(),
     version: items.map((item) => `${item.nft.id}:${item.nft.version}:${item.quantity}`).join("|"),
     expiresAt: new Date(Date.now() + 5 * 60_000).toISOString(),
-    changedItems: items.filter((item) => item.priceSnapshot !== item.nft.priceEth).map((item) => item.nft.id),
+    changedItems: items
+      .filter((item) => item.priceSnapshot !== item.nft.priceEth || item.quantity > item.nft.available)
+      .map((item) => item.nft.id),
   };
 }
 
@@ -254,6 +256,17 @@ export const handlers = [
     saveDb();
     return new HttpResponse(null, { status: 204 });
   }),
+  http.post("/api/cart/reprice", () => {
+    const owner = getCartOwner();
+    const cart = getDb().carts[owner] ?? [];
+    getDb().carts[owner] = cart.flatMap((item) => {
+      const nft = getDb().nfts.find((candidate) => candidate.id === item.nftId);
+      if (!nft?.available) return [];
+      return [{ ...item, quantity: Math.min(item.quantity, nft.available), priceSnapshot: nft.priceEth }];
+    });
+    saveDb();
+    return HttpResponse.json({ items: cartLines(), updatedAt: new Date().toISOString() });
+  }),
   http.post("/api/quotes", async ({ request }) => {
     const { coupon } = (await request.json()) as { coupon?: string };
     if (coupon && !["JUNGLE10", "EXPIRED10"].includes(coupon.toUpperCase()))
@@ -316,10 +329,28 @@ export const handlers = [
     const body = (await request.json()) as Partial<Wallet>;
     const wallet = (getDb().wallets[userId] ?? []).find((item) => item.id === params.walletId);
     if (!wallet) return jsonError(404, "WALLET_NOT_FOUND", "Carteira não encontrada.");
+    if (body.address && !/^0x[a-fA-F0-9]{40}$/.test(body.address))
+      return jsonError(422, "INVALID_ADDRESS", "Informe um endereço de carteira válido.", {
+        address: "Use um endereço EVM com 42 caracteres.",
+      });
     if (body.primary) getDb().wallets[userId].forEach((item) => (item.primary = false));
     Object.assign(wallet, body);
     saveDb();
     return HttpResponse.json(wallet);
+  }),
+
+  /** Recovers an order after a client-side timeout without creating a duplicate. */
+  http.get("/api/orders/recover", ({ request }) => {
+    const userId = requireUser();
+    if (!userId) return jsonError(401, "UNAUTHORIZED", "Sessão necessária.");
+    const key = new URL(request.url).searchParams.get("key");
+    const db = getDb();
+    const previous = key ? db.idempotency[key] : undefined;
+    const order = previous ? db.orders[previous.orderId] : undefined;
+    const ownsWallet = order && (db.wallets[userId] ?? []).some((wallet) => wallet.id === order.wallet.id);
+    return order && ownsWallet
+      ? HttpResponse.json(order)
+      : jsonError(404, "ORDER_NOT_FOUND", "Nenhum pedido pendente foi encontrado.");
   }),
 
   http.post("/api/orders", async ({ request }) => {
@@ -433,6 +464,24 @@ export const handlers = [
       occurredAt: new Date().toISOString(),
       patch: { priceEth: nft.priceEth, available: nft.available },
     };
+    broadcastSocketEvent("nft.updated", event);
+    return HttpResponse.json(event);
+  }),
+  http.post("/api/mock/events/nft/raw", async ({ request }) => {
+    const event = (await request.json()) as NftUpdatedEvent;
+    const nft = getDb().nfts.find((item) => item.id === event.resourceId);
+    if (!nft) return jsonError(404, "NFT_NOT_FOUND", "NFT não encontrado.");
+    // The simulated server also rejects duplicate/out-of-order versions, so the
+    // polling fallback and a reconnected socket converge to the same state.
+    if (event.version > nft.version) {
+      nft.previousPriceEth = nft.priceEth;
+      if (event.patch.priceEth) nft.priceEth = event.patch.priceEth;
+      if (event.patch.available !== undefined) {
+        nft.available = Math.max(0, Math.min(event.patch.available, nft.totalSupply));
+      }
+      nft.version = event.version;
+      saveDb();
+    }
     broadcastSocketEvent("nft.updated", event);
     return HttpResponse.json(event);
   }),

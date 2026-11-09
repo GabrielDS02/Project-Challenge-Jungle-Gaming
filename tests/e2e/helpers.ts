@@ -6,7 +6,13 @@ export async function resetMock(page: Page) {
   await page.evaluate(async () => {
     await fetch("/api/mock/reset", { method: "POST" });
   });
-  await page.reload();
+  // Service-worker activation can abort the first reload on Chromium. Retrying
+  // the same public route keeps reset deterministic without hiding app errors.
+  try {
+    await page.reload({ waitUntil: "domcontentloaded" });
+  } catch {
+    await page.goto("/", { waitUntil: "domcontentloaded" });
+  }
 }
 
 export async function login(page: Page, email = "ada@jungle.test", password = "Jungle@123") {

@@ -6,6 +6,7 @@ test.beforeEach(async ({ page }) => resetMock(page));
 test("preço muda via Socket.IO e checkout exige nova cotação", async ({ page }) => {
   await login(page);
   await page.goto("/nfts/emerald-ape-442");
+  await expect.poll(() => page.locator("html").getAttribute("data-realtime")).toMatch(/connected|fallback/);
   await page.getByRole("button", { name: /Adicionar ao carrinho/ }).click();
   await expect(page.getByRole("link", { name: /Carrinho com 1 itens/ })).toBeVisible();
   await page.goto("/cart");
@@ -19,6 +20,36 @@ test("preço muda via Socket.IO e checkout exige nova cotação", async ({ page 
   await expect(page.getByText(/Preço atualizado/)).toBeVisible();
   await page.goto("/checkout");
   await expect(page.getByText(/2\.93(?:00)? ETH/).first()).toBeVisible();
+  await page.getByText(/Revisei os itens/).click();
+  await page.getByRole("button", { name: "Revisar valores" }).click();
+  await page.getByRole("button", { name: "Confirmar compra" }).click();
+  await expect(page.getByRole("heading", { name: /a obra agora é sua/i })).toBeVisible({ timeout: 8_000 });
+});
+
+test("eventos duplicados ou antigos não fazem o preço regredir", async ({ page }) => {
+  await page.goto("/nfts/emerald-ape-442");
+  await expect.poll(() => page.locator("html").getAttribute("data-realtime")).toMatch(/connected|fallback/);
+  const emit = (version: number, priceEth: string) =>
+    page.evaluate(
+      async ({ version, priceEth }) => {
+        await fetch("/api/mock/events/nft/raw", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            resourceId: "emerald-ape-442",
+            version,
+            occurredAt: new Date().toISOString(),
+            patch: { priceEth, available: 1 },
+          }),
+        });
+      },
+      { version, priceEth },
+    );
+  await emit(50, "3.77");
+  await expect(page.getByText(/3\.77(?:00)? ETH/).first()).toBeVisible();
+  await emit(50, "0.01");
+  await emit(49, "0.02");
+  await expect(page.getByText(/3\.77(?:00)? ETH/).first()).toBeVisible();
 });
 
 test("navegação por teclado, foco do diálogo e validação", async ({ page }) => {

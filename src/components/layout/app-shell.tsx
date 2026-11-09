@@ -4,6 +4,7 @@ import { useRealtime } from "@/features/realtime/use-realtime";
 import { Header } from "./header";
 import { Footer } from "./footer";
 import { MockLab } from "@/components/mock-lab";
+import { MobileNav } from "./mobile-nav";
 
 export function AppShell() {
   useRealtime();
@@ -14,6 +15,7 @@ export function AppShell() {
         <Outlet />
       </main>
       <Footer />
+      <MobileNav />
       {import.meta.env.VITE_ENABLE_MOCKS !== "false" && <MockLab />}
       {import.meta.env.DEV && <ReactQueryDevtools buttonPosition="bottom-right" initialIsOpen={false} />}
       <div id="live-region" className="sr-only" aria-live="polite" aria-atomic="true" />

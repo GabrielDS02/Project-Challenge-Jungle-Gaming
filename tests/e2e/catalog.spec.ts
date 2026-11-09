@@ -11,11 +11,26 @@ test("busca, filtros, ordenação, paginação e histórico", async ({ page }) =
   await page.getByRole("combobox", { name: "Categoria" }).click();
   await page.getByRole("option", { name: "Arte", exact: true }).click();
   await expect(page).toHaveURL(/category=art/);
+  await page.getByRole("combobox", { name: "Edição" }).click();
+  await page.getByRole("option", { name: "Única", exact: true }).click();
+  await expect(page).toHaveURL(/edition=unique/);
   await page.getByRole("combobox", { name: "Ordenar" }).click();
   await page.getByRole("option", { name: "Maior preço", exact: true }).click();
   await expect(page).toHaveURL(/sort=price-desc/);
   await page.goBack();
   await expect(page.getByRole("combobox", { name: "Ordenar" })).not.toHaveText("Maior preço");
+  await page.goto("/");
+  await page.getByRole("button", { name: "Próxima" }).click();
+  await expect(page).toHaveURL(/page=2/);
+  await page.goBack();
+  await expect(page).not.toHaveURL(/page=2/);
+});
+
+test("catálogo apresenta estado vazio sem perder os filtros", async ({ page }) => {
+  await page.getByLabel("Buscar no catálogo").fill("coleção inexistente");
+  await page.getByRole("button", { name: "Buscar", exact: true }).click();
+  await expect(page.getByRole("heading", { name: "Nada por aqui ainda" })).toBeVisible();
+  await expect(page).toHaveURL(/search=cole%C3%A7%C3%A3o/);
 });
 
 test("menus de opção preservam contraste e tema escuro", async ({ page }) => {

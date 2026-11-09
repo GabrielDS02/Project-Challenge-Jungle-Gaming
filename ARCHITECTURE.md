@@ -44,6 +44,10 @@ cache privado. Expiração redireciona rotas privadas e preserva o destino.
 ETH é string decimal no transporte e `decimal.js` no cálculo. O pedido recebe
 `Idempotency-Key`; repetir chave e corpo recupera o mesmo pedido, enquanto corpo
 diferente retorna 409. O recibo contém um snapshot imutável da cotação.
+Durante o checkout, a chave fica no `sessionStorage` até uma resposta bem-sucedida;
+assim um timeout seguido de reload recupera a mesma tentativa em vez de criar
+uma compra duplicada. Preços/estoque alterados passam por `/cart/reprice` e uma
+segunda confirmação explícita.
 
 ## Tempo real
 
@@ -51,17 +55,31 @@ O app usa `socket.io-client`. O MSW intercepta o WebSocket e o binding traduz os
 frames Engine.IO/Socket.IO. Eventos têm `resourceId`, `version` e `occurredAt`.
 O cliente ignora versões antigas/duplicadas; ao reconectar invalida dados ativos
 para reconciliar com REST. O mock suporta namespace padrão e eventos de texto.
-Como fallback exclusivo da demonstração local, o emissor também publica um
-`CustomEvent`; o mesmo controle de versão elimina duplicatas quando Socket.IO e
-o fallback chegam juntos e mantém a interface responsiva em proxies que bloqueiam
-WebSocket.
+Como fallback exclusivo da demonstração, o emissor também publica um
+`CustomEvent` e o cliente mantém uma reconciliação REST de baixa frequência.
+O mesmo controle de versão elimina duplicatas quando Socket.IO, fallback e REST
+chegam juntos, mantendo a interface responsiva em proxies que bloqueiam WebSocket
+ou perdem um frame durante a reconexão.
 
 ## Figma e acessibilidade
 
-A composição, tons espresso, acento âmbar, tipografia editorial e proporções
-seguem os frames públicos do Figma. As artes foram substituídas por imagens
+A composição Kurio, tons espresso, acento âmbar, tipografia monoespaçada e proporções
+seguem os frames públicos do Figma. Início, detalhe, carrinho, pagamento,
+confirmação, login, cadastro, perfil e carteiras compartilham os mesmos tokens,
+breakpoints e componentes de navegação. As artes foram substituídas por imagens
 originais geradas para evitar dependências e direitos de coleções existentes.
 Contraste/foco e reflow receberam pequenos ajustes em relação ao frame.
+
+O shell usa cabeçalho compacto no desktop e navegação inferior em início,
+detalhe e conta no mobile. Carrinho, checkout, autenticação e recibo omitem a
+barra inferior para preservar o espaço dos controles críticos. O grid usa
+`min-width: 0`, containers fluidos e bloqueio de overflow no eixo horizontal;
+os regressivos observam 390×844 e 1440×1000, e a inspeção intermediária cobre
+768 px.
+
+Google e Facebook são ações sociais simuladas pelo mesmo contrato REST de
+sessão. Não há OAuth real, popup externo ou promessa de integração fora do
+escopo; ambos autenticam de forma determinística a conta fictícia da demo.
 
 ## PWA e cache offline
 
@@ -78,6 +96,17 @@ duas responsabilidades sem registrar workers concorrentes:
 O navegador envia ao worker a lista real de bundles com hash após o primeiro
 carregamento. Um `MessageChannel` confirma a conclusão antes de marcar o shell
 como pronto para uso offline.
+
+## Limitações e decisões de escopo
+
+- Blockchain, assinatura de carteira, OAuth social e pagamento são simulações
+  determinísticas; nenhuma credencial ou transação real é solicitada.
+- Editorial, suporte, atividade, ofertas e downloads não foram transformados em
+  páginas fictícias porque o enunciado os declara fora da entrega.
+- As artes são assets locais originais. A composição acompanha o Figma, mas foco,
+  contraste, mensagens de erro, estados vazios e reflow recebem ajustes de UX.
+- O MSW usa armazenamento do navegador; para produção real, sessão, autorização,
+  idempotência e persistência pertencem a uma API segura.
 
 ## Segurança
 

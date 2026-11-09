@@ -31,9 +31,9 @@ export function OrderPage() {
   return (
     <>
       <Seo title={`Pedido ${data.id}`} description={`Acompanhe o estado e o recibo do pedido ${data.id}.`} />
-      <div className="container py-14">
-        <section className="mx-auto max-w-3xl border border-white/8 bg-roast">
-          <div className="p-7 text-center sm:p-10">
+      <div className="container py-12">
+        <section className="mx-auto max-w-3xl border border-ember/25 border-b-[8px] bg-roast shadow-2xl">
+          <div className="p-7 text-center sm:p-9">
             {pending ? (
               <Clock3 className="mx-auto animate-pulse text-ember motion-reduce:animate-none" size={52} />
             ) : confirmed ? (
@@ -42,11 +42,11 @@ export function OrderPage() {
               <CircleX className="mx-auto text-red-300" size={52} />
             )}
             <p className="eyebrow mt-5">Pedido {data.id}</p>
-            <h1 className="mt-3 font-display text-4xl font-bold">
+            <h1 className="mt-3 font-display text-2xl font-black sm:text-3xl">
               {pending
                 ? "Seu pedido está sendo confirmado"
                 : confirmed
-                  ? "A obra agora é sua"
+                  ? "A obra agora é sua — seus NFTs estão na sua carteira"
                   : "Pagamento recusado"}
             </h1>
             <p className="mx-auto mt-3 max-w-xl text-sm leading-6 text-sand/50">
@@ -58,18 +58,18 @@ export function OrderPage() {
                     "A carteira recusou a operação. Seus itens continuam no carrinho.")}
             </p>
           </div>
-          <div className="border-t border-white/8 p-6 sm:p-8">
-            <div className="grid gap-4 text-sm sm:grid-cols-2">
+          <div className="border-t border-ember/30 p-6 sm:p-8">
+            <div className="grid gap-4 border-b border-ember/25 pb-5 text-sm sm:grid-cols-4">
               <div>
                 <p className="text-[10px] uppercase tracking-widest text-sand/35">Transação</p>
-                <p className="mt-2 flex items-center gap-2 break-all text-sand/65">
+                <p className="mt-2 flex items-center gap-2 break-all text-xs text-sand/65">
                   {shortAddress(data.transactionId)}
                   <ExternalLink size={13} />
                 </p>
               </div>
               <div>
                 <p className="text-[10px] uppercase tracking-widest text-sand/35">Data</p>
-                <p className="mt-2 text-sand/65">
+                <p className="mt-2 text-xs text-sand/65">
                   {new Intl.DateTimeFormat("pt-BR", { dateStyle: "medium", timeStyle: "short" }).format(
                     new Date(data.createdAt),
                   )}
@@ -77,24 +77,30 @@ export function OrderPage() {
               </div>
               <div>
                 <p className="text-[10px] uppercase tracking-widest text-sand/35">Carteira</p>
-                <p className="mt-2 text-sand/65">
+                <p className="mt-2 text-xs text-sand/65">
                   {data.wallet.label} · {shortAddress(data.wallet.address)}
                 </p>
               </div>
               <div>
                 <p className="text-[10px] uppercase tracking-widest text-sand/35">Status</p>
-                <p className="mt-2 capitalize text-sand/65">{data.status}</p>
+                <p className="mt-2 text-xs capitalize text-sand/65">{data.status}</p>
               </div>
             </div>
             <div className="mt-7 space-y-3 border-t border-white/8 pt-6">
               {data.quote.items.map((line) => (
                 <div key={line.nftId} className="flex items-center gap-4">
-                  <NftArtwork index={line.nft.imageIndex} alt={line.nft.name} className="size-16 shrink-0" />
+                  <NftArtwork
+                    index={line.nft.imageIndex}
+                    alt={line.nft.name}
+                    className="size-14 shrink-0 rounded-[8px]"
+                  />
                   <div className="flex-1">
                     <p className="font-bold">{line.nft.name}</p>
                     <p className="mt-1 text-xs text-sand/40">Quantidade {line.quantity}</p>
                   </div>
-                  <p className="text-sm font-bold">{formatEth(line.nft.priceEth)}</p>
+                  <p className="text-sm font-bold text-ember">
+                    {formatEth((Number(line.nft.priceEth) * line.quantity).toFixed(3))}
+                  </p>
                 </div>
               ))}
             </div>
@@ -118,7 +124,18 @@ export function OrderPage() {
             </dl>
           </div>
         </section>
-        <div className="mt-8 flex justify-center">
+        <div className="mt-8 flex flex-wrap justify-center gap-3">
+          {confirmed && (
+            <Button asChild>
+              <a
+                href={`https://sepolia.etherscan.io/tx/${data.transactionId}`}
+                target="_blank"
+                rel="noreferrer"
+              >
+                Ver no Etherscan <ExternalLink size={14} />
+              </a>
+            </Button>
+          )}
           <Button asChild variant="secondary">
             <Link to="/">Voltar ao marketplace</Link>
           </Button>

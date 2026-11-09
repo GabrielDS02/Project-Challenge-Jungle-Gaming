@@ -1,5 +1,5 @@
 import { Link, useNavigate, useSearch } from "@tanstack/react-router";
-import { Eye, EyeOff, LockKeyhole } from "lucide-react";
+import { Eye, EyeOff } from "lucide-react";
 import { type FormEvent, type ReactNode, useState } from "react";
 import { NftArtwork } from "@/components/nft-artwork";
 import { Seo } from "@/components/seo";
@@ -11,28 +11,40 @@ import { getErrorMessage } from "@/lib/utils";
 
 function AuthCanvas({ children, title, subtitle }: { children: ReactNode; title: string; subtitle: string }) {
   return (
-    <div className="container grid min-h-[calc(100vh-72px)] items-center gap-10 py-12 lg:grid-cols-[1fr_460px]">
-      <section className="relative hidden min-h-[620px] overflow-hidden border border-white/8 bg-roast lg:block">
-        <NftArtwork
-          index={0}
-          alt="Colecionável Jungle"
-          className="absolute inset-0 h-full w-full opacity-80"
-        />
-        <div className="absolute inset-0 bg-gradient-to-t from-ink via-ink/25 to-transparent" />
-        <div className="absolute bottom-10 left-10 right-10">
-          <p className="eyebrow">Uma identidade. Uma coleção.</p>
-          <p className="mt-3 max-w-xl font-display text-5xl font-bold leading-none">
-            SEJA DONO DO FUTURO DA ARTE DIGITAL
-          </p>
-        </div>
-      </section>
-      <section className="border border-white/8 bg-roast p-6 sm:p-9">
-        <LockKeyhole className="text-ember" />
-        <h1 className="mt-5 font-display text-4xl font-bold">{title}</h1>
-        <p className="mt-2 text-sm leading-6 text-sand/50">{subtitle}</p>
+    <div className="relative grid min-h-[calc(100vh-58px)] place-items-center overflow-hidden px-3 py-10">
+      <div className="absolute inset-0 hidden opacity-35 sm:grid sm:grid-cols-3" aria-hidden="true">
+        <NftArtwork index={0} alt="" />
+        <NftArtwork index={4} alt="" />
+        <NftArtwork index={2} alt="" />
+      </div>
+      <div className="absolute inset-0 bg-ink/80 backdrop-blur-[2px]" />
+      <section className="relative z-10 w-full max-w-[430px] border border-ember/25 bg-roast p-6 shadow-2xl sm:p-8">
+        <p className="text-center text-xs font-black tracking-[.24em] text-sand">KURIO</p>
+        <h1 className="mt-7 text-center font-display text-2xl font-black">{title}</h1>
+        <p className="mt-2 text-center text-[10px] leading-5 text-sand/50">{subtitle}</p>
         {children}
       </section>
     </div>
+  );
+}
+
+function SocialButtons({ pending, onSocial }: { pending: boolean; onSocial: () => void }) {
+  return (
+    <>
+      <div className="my-5 flex items-center gap-3 text-[9px] text-sand/35">
+        <span className="h-px flex-1 bg-white/10" />
+        Ou continue com
+        <span className="h-px flex-1 bg-white/10" />
+      </div>
+      <div className="grid gap-2">
+        <Button type="button" variant="secondary" className="w-full" disabled={pending} onClick={onSocial}>
+          <span className="text-base font-black text-[#4285f4]">G</span> Continuar com Google
+        </Button>
+        <Button type="button" variant="secondary" className="w-full" disabled={pending} onClick={onSocial}>
+          <span className="text-base font-black text-[#6f91ff]">f</span> Continuar com Facebook
+        </Button>
+      </div>
+    </>
   );
 }
 
@@ -84,14 +96,19 @@ export function LoginPage() {
     event.preventDefault();
     login.mutate({ email, password }, { onSuccess: () => void navigate({ to: search.redirect || "/" }) });
   };
+  const socialLogin = () =>
+    login.mutate(
+      { email: "ada@jungle.test", password: "Jungle@123" },
+      { onSuccess: () => void navigate({ to: search.redirect || "/" }) },
+    );
   return (
     <>
       <Seo
         title="Entrar"
         description="Acesse sua conta fictícia para favoritar, finalizar pedidos e gerenciar carteiras."
       />
-      <AuthCanvas title="Bem-vindo de volta" subtitle="Entre para continuar sua jornada como colecionador.">
-        <form className="mt-8 space-y-5" onSubmit={submit} noValidate>
+      <AuthCanvas title="Entrar" subtitle="Acesse sua carteira, coleção e perfil de qualquer lugar.">
+        <form className="mt-6 space-y-4" onSubmit={submit} noValidate>
           <Field id="email" label="E-mail">
             <Input
               id="email"
@@ -112,6 +129,7 @@ export function LoginPage() {
             {login.isPending ? "Entrando…" : "Entrar na conta"}
           </Button>
         </form>
+        <SocialButtons pending={login.isPending} onSocial={socialLogin} />
         <p className="mt-6 text-center text-sm text-sand/45">
           Ainda não faz parte?{" "}
           <Link
@@ -134,24 +152,37 @@ export function RegisterPage() {
   const search = useSearch({ from: "/register" });
   const navigate = useNavigate();
   const register = useRegister();
+  const social = useLogin();
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [confirmPassword, setConfirmPassword] = useState("");
+  const [clientError, setClientError] = useState("");
   const submit = (event: FormEvent) => {
     event.preventDefault();
+    if (password !== confirmPassword) {
+      setClientError("As senhas precisam ser iguais.");
+      return;
+    }
+    setClientError("");
     register.mutate(
       { name, email, password },
       { onSuccess: () => void navigate({ to: search.redirect || "/" }) },
     );
   };
+  const socialRegister = () =>
+    social.mutate(
+      { email: "ada@jungle.test", password: "Jungle@123" },
+      { onSuccess: () => void navigate({ to: search.redirect || "/" }) },
+    );
   return (
     <>
       <Seo title="Criar conta" description="Crie uma conta fictícia de colecionador no marketplace Jungle." />
       <AuthCanvas
-        title="Comece sua coleção"
-        subtitle="Uma conta segura, criada apenas no ambiente simulado deste desafio."
+        title="Criar conta"
+        subtitle="Crie seu perfil de colecionador e conecte uma carteira quando quiser."
       >
-        <form className="mt-8 space-y-5" onSubmit={submit} noValidate>
+        <form className="mt-6 space-y-4" onSubmit={submit} noValidate>
           <Field id="name" label="Nome completo">
             <Input
               id="name"
@@ -173,6 +204,23 @@ export function RegisterPage() {
             />
           </Field>
           <PasswordField value={password} onChange={setPassword} />
+          <Field id="confirm-password" label="Confirmar senha" error={clientError || undefined}>
+            <Input
+              id="confirm-password"
+              type="password"
+              value={confirmPassword}
+              onChange={(event) => setConfirmPassword(event.target.value)}
+              autoComplete="new-password"
+              minLength={8}
+              required
+              error={Boolean(clientError)}
+            />
+          </Field>
+          {clientError && (
+            <p role="alert" className="text-sm text-red-300">
+              {clientError}
+            </p>
+          )}
           {register.isError && (
             <p role="alert" className="text-sm text-red-300">
               {getErrorMessage(register.error)}
@@ -182,6 +230,7 @@ export function RegisterPage() {
             {register.isPending ? "Criando…" : "Criar minha conta"}
           </Button>
         </form>
+        <SocialButtons pending={social.isPending} onSocial={socialRegister} />
         <p className="mt-6 text-center text-sm text-sand/45">
           Já possui conta?{" "}
           <Link

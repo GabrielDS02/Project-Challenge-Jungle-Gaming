@@ -9,12 +9,20 @@ pnpm test:visual
 pnpm lighthouse
 ```
 
-O Playwright inicia `pnpm preview`, usa Chromium em 1440×1000 e 390×844,
-mantém trace/video/screenshot em falhas e gera relatório HTML.
+O Playwright inicia `pnpm preview`, usa Chromium em 1440×1000, 768×900 e 390×844,
+mantém trace/video/screenshot em falhas e gera relatório HTML. A execução usa um
+worker para que resets do banco MSW e do service worker PWA sejam determinísticos.
 
 Os testes de interface também verificam que a galeria troca de imagem, o zoom é
 acessível, as colunas não se sobrepõem e os menus Radix preservam contraste em
 desktop/mobile.
+
+A suíte contém 76 execuções — 26 cenários em desktop e mobile, além dos 24
+cenários não visuais em tablet — e inclui autenticação social simulada, perfil,
+carteiras, PWA/offline,
+Socket.IO e quatro baselines por viewport: início, detalhe, carrinho e pagamento.
+Além dos perfis automatizados de 390×844 e 1440×1000, o reflow é inspecionado a
+768 px antes da entrega.
 
 ## PWA
 

@@ -1,5 +1,5 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { LockKeyhole, Save, UserRound } from "lucide-react";
+import { LockKeyhole, Save } from "lucide-react";
 import { type FormEvent, useState } from "react";
 import { NftArtwork } from "@/components/nft-artwork";
 import { Seo } from "@/components/seo";
@@ -10,6 +10,7 @@ import { Input } from "@/components/ui/input";
 import { api } from "@/lib/api";
 import { getErrorMessage } from "@/lib/utils";
 import type { Profile } from "@/types/api";
+import { AccountNavigation } from "@/components/layout/account-navigation";
 
 export function ProfilePage() {
   const client = useQueryClient();
@@ -46,36 +47,27 @@ export function ProfilePage() {
   return (
     <>
       <Seo title="Perfil" description="Gerencie dados e avatar da conta fictícia de colecionador." />
-      <div className="container py-12">
-        <div className="flex items-center gap-3">
-          <UserRound className="text-ember" />
-          <div>
-            <p className="eyebrow">Área do colecionador</p>
-            <h1 className="section-title mt-2">Meu perfil</h1>
-          </div>
-        </div>
-        <div className="mt-10 grid gap-8 lg:grid-cols-[260px_1fr]">
-          <aside className="h-fit border border-white/8 bg-roast p-5">
-            <NftArtwork index={data.avatarIndex} alt={`Avatar de ${data.name}`} />
-            <p className="mt-4 text-center font-display text-xl">{data.name}</p>
-            <p className="mt-1 text-center text-xs text-sand/40">{data.email}</p>
-            <nav className="mt-6 border-t border-white/8 pt-4 text-sm">
-              <a href="#dados" className="block border-l-2 border-ember px-3 py-2 text-ember">
-                Perfil do colecionador
-              </a>
-              <a
-                href="/wallets"
-                className="block border-l-2 border-transparent px-3 py-2 text-sand/50 hover:text-sand"
-              >
-                Carteiras
-              </a>
-            </nav>
-          </aside>
-          <div className="space-y-6">
-            <form id="dados" onSubmit={submit} className="border border-white/8 bg-roast p-6 sm:p-8">
-              <h2 className="font-display text-2xl">Informações pessoais</h2>
+      <div className="container py-10">
+        <h1 className="text-base font-black">Perfil do colecionador</h1>
+        <div className="mt-6 grid gap-8 lg:grid-cols-[230px_1fr]">
+          <AccountNavigation active="profile" />
+          <div className="min-w-0 space-y-6">
+            <form id="dados" onSubmit={submit} className="border border-ember/15 bg-roast/35 p-6 sm:p-8">
+              <div className="flex items-center justify-between gap-5">
+                <div>
+                  <h2 className="text-sm font-black">Perfil do colecionador</h2>
+                  <p className="mt-1 text-[9px] text-sand/40">
+                    Atualize os dados exibidos na sua experiência Kurio.
+                  </p>
+                </div>
+                <NftArtwork
+                  index={data.avatarIndex}
+                  alt={`Avatar de ${data.name}`}
+                  className="size-20 rounded-full border-2 border-ember/30"
+                />
+              </div>
               <div className="mt-6 grid gap-5 sm:grid-cols-2">
-                <Field id="profile-name" label="Nome">
+                <Field id="profile-name" label="Nome de exibição">
                   <Input
                     id="profile-name"
                     value={data.name}
@@ -149,11 +141,11 @@ export function ProfilePage() {
                 event.preventDefault();
                 password.mutate();
               }}
-              className="border border-white/8 bg-roast p-6 sm:p-8"
+              className="border border-ember/15 bg-roast/35 p-6 sm:p-8"
             >
               <div className="flex items-center gap-3">
                 <LockKeyhole className="text-ember" />
-                <h2 className="font-display text-2xl">Alterar senha</h2>
+                <h2 className="text-sm font-black">Alterar senha</h2>
               </div>
               <div className="mt-6 grid gap-5 sm:grid-cols-2">
                 <Field id="current-password" label="Senha atual">

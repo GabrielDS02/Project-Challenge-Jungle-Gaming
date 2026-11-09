@@ -67,9 +67,10 @@ function NftDetailContent({ nftId }: { nftId: string }) {
       />
       <div className="detail-page relative overflow-hidden border-b border-white/5">
         <div className="pointer-events-none absolute -left-32 top-24 size-96 rounded-full bg-ember/5 blur-3xl" />
-        <div className="container relative py-10 sm:py-14 xl:py-16">
-          <div className="grid min-w-0 gap-10 xl:grid-cols-[minmax(0,1.08fr)_minmax(380px,.92fr)] xl:items-start xl:gap-14">
-            <div className="gallery-intro min-w-0 xl:sticky xl:top-28">
+        <div className="container relative py-8 sm:py-10 xl:py-12">
+          <p className="mb-6 text-[9px] text-sand/45">Início / Mercado / {item.name}</p>
+          <div className="grid min-w-0 gap-9 lg:grid-cols-[minmax(0,1.08fr)_minmax(340px,.92fr)] lg:items-start lg:gap-10">
+            <div className="gallery-intro min-w-0 lg:sticky lg:top-24">
               <div className="grid min-w-0 gap-3 sm:grid-cols-[76px_minmax(0,1fr)]">
                 <div className="order-2 flex gap-3 overflow-x-auto pb-1 sm:order-1 sm:flex-col sm:overflow-visible">
                   {gallery.map((index, position) => {
@@ -126,9 +127,9 @@ function NftDetailContent({ nftId }: { nftId: string }) {
               </p>
             </div>
 
-            <section className="detail-intro min-w-0 xl:pt-3">
+            <section className="detail-intro min-w-0 lg:pt-2">
               <p className="eyebrow">{item.collection}</p>
-              <h1 className="mt-3 break-words font-display text-[clamp(3rem,6vw,5.4rem)] font-bold leading-[.88] tracking-[-.045em]">
+              <h1 className="mt-3 break-words font-display text-[clamp(2rem,4vw,3.2rem)] font-black leading-[.95] tracking-[-.06em]">
                 {item.name}
               </h1>
               <p className="mt-3 text-sm text-sand/45">
@@ -218,8 +219,8 @@ function NftDetailContent({ nftId }: { nftId: string }) {
         </div>
       </div>
 
-      <div className="container pb-16 pt-12">
-        <section className="border-t border-white/10 pt-10">
+      <div className="container pb-8 pt-10">
+        <section className="border-t border-ember/20 pt-8">
           <p className="eyebrow">Detalhes do ativo</p>
           <div className="mt-5 grid gap-4 text-sm text-sand/55 sm:grid-cols-3">
             <div className="bg-roast p-5">
@@ -239,6 +240,25 @@ function NftDetailContent({ nftId }: { nftId: string }) {
           </div>
         </section>
       </div>
+
+      <section className="container border-t border-ember/15 py-10" aria-labelledby="related-title">
+        <p className="figma-label">Veja mais da coleção</p>
+        <h2 id="related-title" className="mt-2 text-lg font-black">
+          Colecionadores também viram
+        </h2>
+        <div className="mt-5 grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-5">
+          {[4, 1, 2, 6, 7].map((index) => (
+            <a key={index} href="/#catalogo" className="group figma-panel overflow-hidden">
+              <NftArtwork
+                index={index}
+                alt={`Colecionável relacionado ${index + 1}`}
+                className="transition group-hover:scale-[1.03]"
+              />
+              <p className="truncate p-3 text-[10px] font-black">Kurio Ape #{118 + index}</p>
+            </a>
+          ))}
+        </div>
+      </section>
 
       <Dialog open={previewOpen} onOpenChange={setPreviewOpen}>
         <DialogContent className="w-[min(94vw,920px)] max-w-none overflow-hidden border-ember/25 bg-ink p-3 sm:p-4">

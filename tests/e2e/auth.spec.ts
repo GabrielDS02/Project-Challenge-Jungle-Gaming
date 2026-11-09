@@ -7,7 +7,8 @@ test("cadastro, conflito, login, expiração e logout", async ({ page }) => {
   await page.goto("/register");
   await page.getByLabel("Nome completo").fill("Ada Duplicada");
   await page.getByLabel("E-mail").fill("ada@jungle.test");
-  await page.getByRole("textbox", { name: "Senha" }).fill("Jungle@123");
+  await page.getByRole("textbox", { name: "Senha", exact: true }).fill("Jungle@123");
+  await page.getByLabel("Confirmar senha").fill("Jungle@123");
   await page.getByRole("button", { name: "Criar minha conta" }).click();
   await expect(page.getByRole("alert")).toContainText("Já existe");
 
@@ -25,6 +26,15 @@ test("cadastro, conflito, login, expiração e logout", async ({ page }) => {
   await page.reload();
   await page.goto("/profile");
   await expect(page).toHaveURL(/\/login/);
+});
+
+test("login social simulado retorna ao fluxo anterior", async ({ page }) => {
+  await page.goto("/login?redirect=%2Fprofile");
+  await page.getByRole("button", { name: "Continuar com Google" }).click();
+  await expect(page).toHaveURL(/\/profile$/);
+  await expect(
+    page.getByRole("heading", { name: "Perfil do colecionador", exact: true, level: 1 }),
+  ).toBeVisible();
 });
 
 test("troca de usuário não mantém cache privado", async ({ page }) => {
@@ -46,4 +56,17 @@ test("troca de usuário não mantém cache privado", async ({ page }) => {
   } else {
     await expect(page.getByText(/Olá, Caio/)).toBeVisible();
   }
+});
+
+test("sessão expirada no checkout preserva o destino para retomada", async ({ page }) => {
+  await login(page);
+  await page.goto("/checkout");
+  await setScenario(page, "expired-session");
+  await page.reload();
+  await expect(page).toHaveURL(/\/login\?redirect=.*checkout/);
+  await setScenario(page, "success");
+  await page.getByLabel("E-mail").fill("ada@jungle.test");
+  await page.getByRole("textbox", { name: "Senha", exact: true }).fill("Jungle@123");
+  await page.getByRole("button", { name: "Entrar na conta" }).click();
+  await expect(page).toHaveURL(/\/checkout$/);
 });
