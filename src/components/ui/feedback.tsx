@@ -47,7 +47,7 @@ export function ErrorState({
 export function EmptyState({ title, message }: { title: string; message: string }) {
   return (
     <section className="border border-dashed border-white/15 bg-white/[.02] px-6 py-16 text-center">
-      <p className="font-display text-2xl text-sand">{title}</p>
+      <h2 className="font-display text-2xl text-sand">{title}</h2>
       <p className="mx-auto mt-2 max-w-md text-sm text-sand/50">{message}</p>
     </section>
   );

@@ -5,7 +5,9 @@ export default defineConfig({
   fullyParallel: true,
   forbidOnly: !!process.env.CI,
   retries: process.env.CI ? 2 : 0,
-  workers: process.env.CI ? 2 : undefined,
+  // The browser-persisted MSW database and PWA worker are intentionally stateful;
+  // one worker keeps scenario resets deterministic across every viewport.
+  workers: 1,
   reporter: [["html", { open: "never" }], ["list"]],
   use: {
     baseURL: "http://127.0.0.1:4173",
@@ -19,6 +21,11 @@ export default defineConfig({
     {
       name: "chromium-desktop",
       use: { ...devices["Desktop Chrome"], viewport: { width: 1440, height: 1000 } },
+    },
+    {
+      name: "chromium-tablet",
+      grepInvert: /@visual/,
+      use: { ...devices["Desktop Chrome"], viewport: { width: 768, height: 900 } },
     },
     { name: "chromium-mobile", use: { ...devices["Pixel 7"], viewport: { width: 390, height: 844 } } },
   ],

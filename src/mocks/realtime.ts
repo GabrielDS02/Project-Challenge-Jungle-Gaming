@@ -5,6 +5,8 @@ const origin = window.location.origin.replace(/^http/, "ws");
 export const socketLink = ws.link(`${origin}/socket.io/`);
 
 const clients = new Set<ReturnType<typeof toSocketIo>["client"]>();
+const fallbackChannel =
+  "BroadcastChannel" in window ? new BroadcastChannel("kurio-realtime-events") : undefined;
 
 export const socketHandler = socketLink.addEventListener("connection", (connection) => {
   // The binding decodes Engine.IO frames so the app and mock exchange named Socket.IO events.
@@ -18,4 +20,5 @@ export function broadcastSocketEvent(event: string, payload: unknown) {
   // The browser event keeps the local demo responsive when a corporate proxy blocks WebSockets.
   // Version checks in the consumer deduplicate it when Socket.IO also delivers the event.
   window.dispatchEvent(new CustomEvent(`jungle:${event}`, { detail: payload }));
+  fallbackChannel?.postMessage({ name: event, payload });
 }

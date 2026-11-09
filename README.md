@@ -1,7 +1,7 @@
 <div align="center">
-  <img src="./public/assets/social-banner.jpg" alt="Jungle NFT Marketplace" width="100%" />
+  <img src="./public/assets/social-banner.jpg" alt="Kurio NFT Marketplace" width="100%" />
 
-# Jungle NFT Marketplace
+# Kurio NFT Marketplace
 
 **Uma experiência de descoberta e compra de arte digital, construída para o Frontend Challenge da Jungle Gaming.**
 
@@ -17,10 +17,16 @@
 
 ## Sobre o projeto
 
-O Jungle é um marketplace fictício de NFTs que cobre a jornada completa do
+O Kurio é um marketplace fictício de NFTs que cobre a jornada completa do
 colecionador: descoberta, detalhe, favorito, carrinho, cotação, autenticação,
 carteira, pedido e recibo. A implementação segue o Figma do desafio e trata os
 estados não desenhados com a mesma linguagem visual espresso/âmbar.
+
+O escopo foi conferido com o [README oficial do desafio](https://github.com/junglegaming/frontend-challenge)
+e com os frames desktop/mobile do Figma. Páginas editoriais, suporte, atividade,
+ofertas e downloads permanecem deliberadamente fora do fluxo, como determina o
+enunciado; seus atalhos apontam para documentação/rotas coerentes ou comunicam a
+indisponibilidade sem simular sucesso.
 
 Não é uma maquete estática. REST passa pelo Axios/MSW, estado remoto pelo
 TanStack Query, navegação pelo TanStack Router e tempo real pelo
@@ -41,6 +47,24 @@ TanStack Query, navegação pelo TanStack Router e tempo real pelo
 - Open Graph/WhatsApp, Twitter Card, JSON-LD, sitemap, robots, favicon e manifest.
 - Netlify SPA com CSP, headers de segurança e cache de assets.
 - Playwright E2E/visual e Lighthouse CI.
+
+## Matriz de telas obrigatórias
+
+| Tela        | Rota          | Entrega funcional                                                           |
+| ----------- | ------------- | --------------------------------------------------------------------------- |
+| Início      | `/`           | destaques, catálogo, busca, filtros, ordenação, paginação e URL persistente |
+| Detalhes    | `/nfts/:id`   | galeria, zoom, edição, quantidade, favorito e compra                        |
+| Carrinho    | `/cart`       | quantidades, remoção, cupom, cotação e recomendados                         |
+| Pagamento   | `/checkout`   | perfil, carteira, rede, revisão, revalidação e envio idempotente            |
+| Confirmação | `/orders/:id` | resultado, transação, snapshot dos itens, taxas e total                     |
+| Login       | `/login`      | credenciais, Google/Facebook simulados e retorno ao destino                 |
+| Cadastro    | `/register`   | validação, confirmação de senha, conflito e login social simulado           |
+| Perfil      | `/profile`    | dados, avatar, senha, erros e persistência                                  |
+| Carteiras   | `/wallets`    | cadastro/edição de principal e secundárias, rede e validação EVM            |
+
+Todas as telas usam o mesmo shell Kurio, têm estados de loading/erro/sucesso e
+foram verificadas em Chromium a 390, 768 e 1440 px. A navegação inferior móvel
+é omitida em formulários transacionais para não cobrir campos ou ações.
 
 ## Stack
 
@@ -72,6 +96,18 @@ pnpm dev
 Acesse `http://localhost:5173`. Os mocks vêm ativados por padrão e não exigem
 backend, carteira ou serviço privado.
 
+### Variáveis de ambiente
+
+| Variável                | Padrão         | Finalidade                                      |
+| ----------------------- | -------------- | ----------------------------------------------- |
+| `VITE_ENABLE_MOCKS`     | `true`         | ativa a fronteira REST/WebSocket do MSW         |
+| `VITE_API_BASE_URL`     | `/api`         | prefixo dos contratos REST simulados            |
+| `VITE_DEFAULT_SCENARIO` | `success`      | cenário inicial do laboratório                  |
+| `VITE_PUBLIC_SITE_URL`  | URL do Netlify | origem canônica usada em SEO e compartilhamento |
+
+`.env.example` documenta o ambiente local e `.env.production` mantém a build
+publicada autossuficiente. Nenhuma variável contém segredo.
+
 ### Contas fictícias
 
 | Perfil      | E-mail             | Senha        |
@@ -92,7 +128,7 @@ pnpm build          # typecheck + bundle otimizado
 pnpm preview        # serve o build
 pnpm typecheck      # TypeScript estrito
 pnpm lint           # ESLint
-pnpm test:e2e       # Playwright desktop/mobile
+pnpm test:e2e       # Playwright desktop/tablet/mobile
 pnpm test:visual    # regressão visual
 pnpm test:report    # relatório HTML
 pnpm lighthouse     # 3 auditorias por rota
@@ -116,6 +152,9 @@ O botão de frasco no canto inferior esquerdo abre controles de avaliação:
 
 **Resetar dados** restaura usuários, catálogo, favoritos, carrinhos, carteiras e
 pedidos. A seleção persiste apenas no navegador da demonstração.
+
+As massas determinísticas ficam em `src/mocks/fixtures.ts`; os contratos e o
+estado persistente ficam em `src/mocks/handlers.ts` e `src/mocks/db.ts`.
 
 ## Arquitetura e resiliência
 
@@ -141,7 +180,7 @@ Detalhes completos em [ARCHITECTURE.md](./ARCHITECTURE.md) e
 
 ## Acessibilidade e responsividade
 
-Validado para 390, 768 e 1440 px. A aplicação oferece skip link, landmarks,
+Validado para 390, 768 e 1440 px, sem overflow horizontal. A aplicação oferece skip link, landmarks,
 labels, erros associados, foco visível, foco preso em diálogos, nomes acessíveis,
 contraste, teclado e `prefers-reduced-motion`. Skeletons preservam dimensões.
 
@@ -172,6 +211,8 @@ instalação explícitos são aceitos. Veja [SECURITY.md](./SECURITY.md).
 
 As metas Lighthouse são: Performance ≥ 90, Accessibility ≥ 95, Best Practices
 ≥ 95 e SEO ≥ 90, com três medições de início e detalhe.
+Na auditoria final local (seis execuções), os resultados ficaram em Performance
+96–97, Acessibilidade 100, Boas Práticas 96 e SEO 100.
 
 ## Deploy
 

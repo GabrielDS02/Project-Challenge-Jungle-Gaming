@@ -15,6 +15,7 @@ export function useCart() {
 export function useAddToCart() {
   const client = useQueryClient();
   return useMutation({
+    scope: { id: "cart" },
     mutationFn: async ({ nftId, quantity }: { nftId: string; quantity: number }) =>
       (await api.post<Cart>("/cart/items", { nftId, quantity })).data,
     onSuccess: (cart) => client.setQueryData(["cart"], cart),
@@ -24,6 +25,7 @@ export function useAddToCart() {
 export function useUpdateCartItem() {
   const client = useQueryClient();
   return useMutation({
+    scope: { id: "cart" },
     mutationFn: async ({ nftId, quantity }: { nftId: string; quantity: number }) =>
       (await api.patch<Cart>(`/cart/items/${nftId}`, { quantity })).data,
     onSuccess: (cart) => {
@@ -36,6 +38,7 @@ export function useUpdateCartItem() {
 export function useRemoveCartItem() {
   const client = useQueryClient();
   return useMutation({
+    scope: { id: "cart" },
     mutationFn: (nftId: string) => api.delete(`/cart/items/${nftId}`),
     onSuccess: () => {
       void client.invalidateQueries({ queryKey: ["cart"] });

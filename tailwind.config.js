@@ -13,7 +13,7 @@ export default {
       },
       fontFamily: {
         sans: ["Inter", "ui-sans-serif", "system-ui", "sans-serif"],
-        display: ["Georgia", "Times New Roman", "serif"],
+        display: ["Courier New", "ui-monospace", "monospace"],
       },
       boxShadow: {
         glow: "0 18px 60px rgba(232, 144, 69, .18)",
